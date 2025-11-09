@@ -50,12 +50,29 @@ class StackQLMCPClient:
                 timeout=30
             )
             response.raise_for_status()
-            result = response.json()
+
+            # Try to parse JSON response
+            try:
+                result = response.json()
+            except json.JSONDecodeError as e:
+                raise Exception(f"MCP server returned invalid JSON. Response: {response.text[:200]}")
 
             if "error" in result:
-                raise Exception(f"MCP Error: {result['error']}")
+                error_detail = result['error']
+                if isinstance(error_detail, dict):
+                    error_msg = error_detail.get('message', str(error_detail))
+                else:
+                    error_msg = str(error_detail)
+                raise Exception(f"MCP Error: {error_msg}")
 
             return result.get("result", {})
+
+        except requests.exceptions.ConnectionError as e:
+            raise Exception(f"Cannot connect to StackQL MCP server at {self.base_url}. Is the server running?")
+        except requests.exceptions.Timeout as e:
+            raise Exception(f"Request to StackQL MCP server timed out after 30 seconds")
+        except requests.exceptions.HTTPError as e:
+            raise Exception(f"HTTP Error {response.status_code} from MCP server: {response.text[:200]}")
         except requests.exceptions.RequestException as e:
             raise Exception(f"Failed to call MCP tool '{tool_name}': {str(e)}")
 

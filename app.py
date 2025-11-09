@@ -200,24 +200,28 @@ def main():
     # Display chat history
     display_chat_history()
 
-    # Chat input
-    if prompt := st.chat_input("Ask about your cloud infrastructure..."):
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
+    # Check if there's a pending user message that needs a response
+    # (happens when example buttons are clicked)
+    if (len(st.session_state.messages) > 0 and
+        st.session_state.messages[-1]["role"] == "user" and
+        (len(st.session_state.messages) == 1 or
+         st.session_state.messages[-2]["role"] == "assistant")):
 
-        # Display user message
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        # Get the last user message
+        user_message = st.session_state.messages[-1]["content"]
 
         # Get agent response
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
+                    # Count how many times system prompt has been used
+                    user_messages_count = sum(1 for msg in st.session_state.messages if msg["role"] == "user")
+
                     # If this is the first message, include the system prompt
-                    if len(st.session_state.messages) == 1:
-                        response = st.session_state.agent.chat(prompt, system_prompt=SYSTEM_PROMPT)
+                    if user_messages_count == 1:
+                        response = st.session_state.agent.chat(user_message, system_prompt=SYSTEM_PROMPT)
                     else:
-                        response = st.session_state.agent.chat(prompt)
+                        response = st.session_state.agent.chat(user_message)
 
                     st.markdown(response)
 
@@ -228,6 +232,12 @@ def main():
                     error_msg = f"Error: {str(e)}"
                     st.error(error_msg)
                     st.session_state.messages.append({"role": "assistant", "content": error_msg})
+
+    # Chat input
+    if prompt := st.chat_input("Ask about your cloud infrastructure..."):
+        # Add user message to chat history and rerun to process it
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.rerun()
 
 
 if __name__ == "__main__":
