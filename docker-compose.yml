@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # StackQL MCP Server
+  stackql:
+    image: stackql/stackql:latest
+    command: >
+      mcp
+      --mcp.server.type=http
+      --mcp.config={"server": {"transport": "http", "address": "0.0.0.0:9912"}}
+    ports:
+      - "9912:9912"
+    environment:
+      # Add your cloud provider credentials here
+      - GOOGLE_CREDENTIALS=${GOOGLE_CREDENTIALS:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID:-}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID:-}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - OKTA_API_TOKEN=${OKTA_API_TOKEN:-}
+    volumes:
+      # Mount credentials file if using service account
+      - ${GOOGLE_CREDENTIALS_PATH:-./credentials}:/credentials:ro
+    networks:
+      - stackql-network
+    restart: unless-stopped
+
+  # Chat Interface
+  chat-interface:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - STACKQL_MCP_URL=http://stackql:9912
+    depends_on:
+      - stackql
+    networks:
+      - stackql-network
+    restart: unless-stopped
+
+networks:
+  stackql-network:
+    driver: bridge
