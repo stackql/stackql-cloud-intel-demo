@@ -124,9 +124,30 @@ The implementation has been tested with:
 - ✅ StackQL MCP server connectivity and health checks
 - ✅ OpenAI function calling integration
 - ✅ Multi-turn conversations with context preservation
-- ✅ Error handling and recovery
+- ✅ Error handling and recovery with detailed error messages
 - ✅ Docker Compose deployment
 - ✅ Cross-provider resource queries
+- ✅ Example question buttons functionality
+- ✅ Chat input processing
+- ✅ Connection error scenarios (server down, timeout, etc.)
+
+## Commit History
+
+This PR includes the following commits:
+
+1. **Implement StackQL MCP Server demo with OpenAI integration** (583e058)
+   - Complete implementation of MCP client, OpenAI agent, and Streamlit UI
+   - Docker and documentation setup
+
+2. **Fix docker-compose command** (10009db)
+   - Corrected command to use `stackql mcp` instead of `mcp`
+
+3. **Add comprehensive PR description** (a51657f)
+   - Detailed PR documentation
+
+4. **Fix UI responsiveness and improve error handling** (f391791)
+   - Fixed example question buttons not working
+   - Enhanced error messages for better debugging
 
 ## Changes in This PR
 
@@ -147,6 +168,10 @@ The implementation has been tested with:
 
 ### Bug Fixes
 - ✅ Fixed docker-compose command syntax (`stackql mcp` instead of `mcp`)
+- ✅ Fixed example question buttons not responding when clicked
+- ✅ Unified message processing flow for chat input and button clicks
+- ✅ Improved MCP client error handling with detailed error messages
+- ✅ Better distinction between connection errors, timeouts, and HTTP errors
 
 ## Requirements
 
