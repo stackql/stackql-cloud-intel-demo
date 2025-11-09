@@ -5,7 +5,7 @@ services:
   stackql:
     image: stackql/stackql:latest
     command: >
-      mcp
+      stackql mcp
       --mcp.server.type=http
       --mcp.config={"server": {"transport": "http", "address": "0.0.0.0:9912"}}
     ports:
